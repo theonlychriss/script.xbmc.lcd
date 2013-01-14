@@ -99,7 +99,6 @@ def getLcdMode():
   return ret
 
 def process_lcd():
-#  bBacklightDimmed = False
 
   while not xbmc.abortRequested:
     if handleConnectLCD():
