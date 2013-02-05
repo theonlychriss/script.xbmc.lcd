@@ -47,12 +47,6 @@ from settings import *
 def log(loglevel, msg):
   xbmc.log("### [%s] - %s" % (__scriptname__,msg,),level=loglevel ) 
 
-# enumerations
-class DISABLE_ON_PLAY:
-  DISABLE_ON_PLAY_NONE = 0
-  DISABLE_ON_PLAY_VIDEO = 1
-  DISABLE_ON_PLAY_MUSIC = 2
-  
 class LCD_MODE:
   LCD_MODE_GENERAL     = 0
   LCD_MODE_MUSIC       = 1
@@ -423,17 +417,23 @@ class LcdBase():
     
     self.SetBacklight(mode)
 
+  def IsDimmingOnMusicAllowed(self, mode):
+    return mode == (LCD_MODE.LCD_MODE_MUSIC or mode == LCD_MODE.LCD_MODE_PVRRADIO) and settings_getDimOnMusicPlayback() and not InfoLabel_IsPlayerPaused()
+
+  def IsDimmingOnVideoAllowed(self, mode):
+    return mode == (LCD_MODE.LCD_MODE_VIDEO or mode == LCD_MODE.LCD_MODE_PVRTV) and settings_getDimOnVideoPlayback() and not InfoLabel_IsPlayerPaused()
+
   def SetBacklight(self, mode):
     # dimming display in case screensaver is active or something is being played back (and not paused!)
     if mode == LCD_MODE.LCD_MODE_SCREENSAVER and settings_getDimOnScreensaver():
       doDim = True
-    elif (mode == LCD_MODE.LCD_MODE_MUSIC or mode == LCD_MODE.LCD_MODE_PVRRADIO) and settings_getDimOnMusicPlayback() and not InfoLabel_IsPlayerPaused():
+    elif self.IsDimmingOnVideoAllowed(mode):
       doDim = True
-    elif (mode == LCD_MODE.LCD_MODE_VIDEO or mode == LCD_MODE.LCD_MODE_PVRTV) and settings_getDimOnVideoPlayback() and not InfoLabel_IsPlayerPaused():
+    elif self.IsDimmingOnMusicAllowed(mode):
       doDim = True
     else:
       doDim = False  
-    
+          
     if doDim:
       if not self.m_bCurrentlyDimmed:
         if (self.m_timeDisableOnPlayTimer + self.m_iDimOnPlayDelay) < time.time():

@@ -268,4 +268,3 @@ def settings_setup():
   settings_handleLcdSettings()
 
   return reconnect
-  
