@@ -418,22 +418,20 @@ class LcdBase():
     self.SetBacklight(mode)
 
   def IsDimmingOnMusicAllowed(self, mode):
-    return mode == (LCD_MODE.LCD_MODE_MUSIC or mode == LCD_MODE.LCD_MODE_PVRRADIO) and settings_getDimOnMusicPlayback() and not InfoLabel_IsPlayerPaused()
+    return (mode == LCD_MODE.LCD_MODE_MUSIC or mode == LCD_MODE.LCD_MODE_PVRRADIO) and settings_getDimOnMusicPlayback()
 
   def IsDimmingOnVideoAllowed(self, mode):
-    return mode == (LCD_MODE.LCD_MODE_VIDEO or mode == LCD_MODE.LCD_MODE_PVRTV) and settings_getDimOnVideoPlayback() and not InfoLabel_IsPlayerPaused()
+    return (mode == LCD_MODE.LCD_MODE_VIDEO or mode == LCD_MODE.LCD_MODE_PVRTV) and settings_getDimOnVideoPlayback()
 
   def SetBacklight(self, mode):
     # dimming display in case screensaver is active or something is being played back (and not paused!)
     if mode == LCD_MODE.LCD_MODE_SCREENSAVER and settings_getDimOnScreensaver():
       doDim = True
-    elif self.IsDimmingOnVideoAllowed(mode):
-      doDim = True
-    elif self.IsDimmingOnMusicAllowed(mode):
+    elif not InfoLabel_IsPlayerPaused() and (self.IsDimmingOnVideoAllowed(mode) or self.IsDimmingOnMusicAllowed(mode)):
       doDim = True
     else:
       doDim = False  
-          
+    
     if doDim:
       if not self.m_bCurrentlyDimmed:
         if (self.m_timeDisableOnPlayTimer + self.m_iDimOnPlayDelay) < time.time():
